@@ -1,0 +1,906 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Aashirwad Amruttulya</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Yatra+One&family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+    :root {
+      --red: #8B0000;
+      --red-dark: #5c0000;
+      --red-mid: #6b0000;
+      --gold: #D4943A;
+      --gold-light: #f0b96a;
+      --gold-dim: rgba(212,148,58,0.18);
+      --amber: #C0622A;
+      --bg: #fdf6ec;
+      --bg2: #f5e8d0;
+      --card: rgba(255,255,255,0.82);
+      --glass: rgba(255,255,255,0.55);
+      --text: #2e1000;
+      --text2: #5a3010;
+      --muted: #9a8060;
+      --border: rgba(212,148,58,0.18);
+      --shadow: 0 4px 24px rgba(139,0,0,0.10);
+      --shadow-lg: 0 8px 40px rgba(139,0,0,0.18);
+    }
+    html, body, #root { height: 100%; width: 100%; overflow: hidden; }
+    body { font-family: 'Nunito', sans-serif; background: var(--bg); color: var(--text); }
+    ::-webkit-scrollbar { width: 0; }
+
+    /* ── Animations ── */
+    @keyframes fadeUp   { from{opacity:0;transform:translateY(18px)} to{opacity:1;transform:translateY(0)} }
+    @keyframes fadeIn   { from{opacity:0} to{opacity:1} }
+    @keyframes scaleIn  { from{opacity:0;transform:scale(0.88)} to{opacity:1;transform:scale(1)} }
+    @keyframes float    { 0%,100%{transform:translateY(0) rotate(-2deg)} 50%{transform:translateY(-6px) rotate(2deg)} }
+    @keyframes steam    { 0%{opacity:0;transform:translateY(0) scaleX(1)} 50%{opacity:0.7} 100%{opacity:0;transform:translateY(-22px) scaleX(1.4)} }
+    @keyframes pulse    { 0%,100%{transform:scale(1)} 50%{transform:scale(1.06)} }
+    @keyframes shimmer  { 0%{background-position:-200% 0} 100%{background-position:200% 0} }
+    @keyframes slideIn  { from{opacity:0;transform:translateX(-12px)} to{opacity:1;transform:translateX(0)} }
+    @keyframes tagPop   { 0%{transform:scale(0.7);opacity:0} 60%{transform:scale(1.12)} 100%{transform:scale(1);opacity:1} }
+
+    .au  { animation: fadeUp  0.5s ease-out both; }
+    .af  { animation: fadeIn  0.4s ease-out both; }
+    .asi { animation: scaleIn 0.35s ease-out both; }
+    .d1{animation-delay:.08s} .d2{animation-delay:.16s} .d3{animation-delay:.24s}
+    .d4{animation-delay:.32s} .d5{animation-delay:.4s}
+
+    /* ── Layout ── */
+    .app   { display:flex; flex-direction:column; height:100%; }
+    .scroll{ flex:1; overflow-y:auto; padding-bottom:76px; }
+
+    /* ── Bottom Nav ── */
+    .nav { position:fixed; bottom:0; left:0; right:0; z-index:30;
+           background:var(--red-dark);
+           border-top:1.5px solid rgba(212,148,58,0.22);
+           box-shadow:0 -4px 24px rgba(0,0,0,0.22); }
+    .nav-row { display:flex; align-items:stretch; height:62px; }
+    .nav-btn { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px;
+               background:none; border:none; cursor:pointer; color:rgba(253,246,236,0.45);
+               transition:color 0.2s, background 0.2s; padding:0; position:relative; }
+    .nav-btn.on { color:var(--gold); }
+    .nav-btn.on::after { content:''; position:absolute; bottom:0; left:20%; right:20%; height:2.5px;
+                          background:var(--gold); border-radius:2px 2px 0 0; }
+    .nav-lbl { font-size:9.5px; font-weight:700; letter-spacing:0.03em; }
+
+    /* ── Hero ── */
+    .hero { position:relative; background:linear-gradient(160deg, var(--red-dark) 0%, var(--red) 60%, #a01515 100%); overflow:hidden; }
+    .hero-bg-pattern {
+      position:absolute; inset:0;
+      background-image: radial-gradient(circle at 20% 30%, rgba(212,148,58,0.15) 0%, transparent 50%),
+                        radial-gradient(circle at 80% 70%, rgba(192,98,42,0.18) 0%, transparent 50%);
+    }
+    .hero-dots {
+      position:absolute; inset:0; overflow:hidden; pointer-events:none;
+    }
+    .hero-dots::before {
+      content:''; position:absolute; inset:0;
+      background-image: radial-gradient(circle, rgba(212,148,58,0.12) 1px, transparent 1px);
+      background-size:20px 20px;
+    }
+    .hero-body { position:relative; padding:22px 20px 0; }
+    .hero-top { display:flex; align-items:center; gap:14px; }
+    .chai-wrap { position:relative; flex-shrink:0; }
+    .steam-line { position:absolute; top:-2px; border-radius:4px; animation:steam 1.8s ease-in-out infinite; background:rgba(253,246,236,0.6); width:3px; }
+    .s1{left:22%;height:14px;animation-delay:0s}
+    .s2{left:45%;height:18px;animation-delay:.5s}
+    .s3{left:68%;height:12px;animation-delay:1s}
+    .hero-name { color:var(--gold); font-size:22px; font-family:'Yatra One',cursive; line-height:1.2; }
+    .hero-roman { color:rgba(253,246,236,0.55); font-size:10.5px; font-weight:600; margin-top:1px; letter-spacing:0.04em; }
+    .hero-badge { display:inline-flex; align-items:center; gap:5px; margin-top:8px;
+                  background:rgba(212,148,58,0.18); border:1px solid rgba(212,148,58,0.35);
+                  border-radius:999px; padding:4px 12px; }
+    .hero-badge-txt { color:var(--gold-light); font-size:11px; font-weight:700; letter-spacing:0.06em; }
+    .hero-info { margin:14px 0 0; background:rgba(255,255,255,0.08); border:1px solid rgba(212,148,58,0.2);
+                 border-radius:14px; padding:12px 14px; backdrop-filter:blur(6px); }
+    .hero-wave { width:100%; display:block; margin-bottom:-1px; margin-top:16px; }
+
+    /* ── Stats card ── */
+    .stats-wrap { padding:0 16px; margin-top:-2px; }
+    .stats-card { background:linear-gradient(135deg, #6b0000 0%, #8B0000 50%, #a01010 100%);
+                  border-radius:18px; padding:14px 16px;
+                  box-shadow:0 6px 28px rgba(139,0,0,0.35);
+                  border:1px solid rgba(212,148,58,0.2); }
+    .stats-grid { display:grid; grid-template-columns:1fr 1px 1fr 1px 1fr 1px 1fr; align-items:center; }
+    .stat { text-align:center; padding:4px 0; }
+    .stat-n { color:var(--bg); font-size:21px; font-weight:800; line-height:1; }
+    .stat-l { color:rgba(253,246,236,0.45); font-size:9.5px; font-weight:600; margin-top:3px; letter-spacing:0.04em; }
+    .stat-sep { background:rgba(253,246,236,0.12); height:36px; }
+
+    /* ── Section ── */
+    .sec { padding:0 16px; margin-top:22px; }
+    .sec-hd { display:flex; align-items:center; gap:8px; margin-bottom:14px; }
+    .sec-title { font-family:'Yatra One',cursive; font-size:19px; color:var(--text); }
+    .sec-count { background:var(--gold-dim); color:var(--amber); font-size:11px; font-weight:700;
+                 padding:2px 8px; border-radius:999px; margin-left:auto; }
+
+    /* ── Tab row ── */
+    .tab-row { display:flex; gap:8px; margin-bottom:14px; }
+    .tab { padding:9px 18px; border-radius:12px; font-size:12.5px; font-weight:700;
+           border:1.5px solid transparent; cursor:pointer; font-family:'Nunito',sans-serif;
+           transition:all 0.2s; }
+    .tab.on { background:var(--red); color:var(--gold); border-color:rgba(212,148,58,0.25);
+               box-shadow:0 3px 12px rgba(139,0,0,0.25); }
+    .tab.off { background:rgba(192,98,42,0.08); color:var(--amber); border-color:rgba(192,98,42,0.15); }
+
+    /* ── Menu list ── */
+    .menu-card { background:var(--card); border:1px solid var(--border); border-radius:18px;
+                 overflow:hidden; box-shadow:var(--shadow); }
+    .menu-row { display:flex; justify-content:space-between; align-items:center; padding:11px 16px;
+                border-bottom:1px solid rgba(212,148,58,0.09); transition:background 0.15s; }
+    .menu-row:last-child { border-bottom:none; }
+    .menu-row:active { background:rgba(212,148,58,0.07); }
+    .menu-nm { font-size:13px; font-weight:600; color:var(--text); }
+    .menu-pr { font-size:13.5px; font-weight:800; color:var(--amber);
+               background:rgba(192,98,42,0.1); padding:2px 9px; border-radius:8px; }
+
+    /* ── Review card ── */
+    .r-card { background:var(--card); border:1px solid var(--border); border-radius:18px; padding:15px;
+              box-shadow:var(--shadow); backdrop-filter:blur(4px);
+              opacity:0; animation:fadeUp 0.45s ease-out both; }
+    .r-top { display:flex; align-items:flex-start; justify-content:space-between; gap:10px; }
+    .r-avatar { width:38px; height:38px; border-radius:50%; background:linear-gradient(135deg,var(--red),var(--amber));
+                display:flex; align-items:center; justify-content:center; flex-shrink:0;
+                font-size:15px; font-weight:800; color:white; text-transform:uppercase; }
+    .r-meta { flex:1; min-width:0; }
+    .r-name { font-size:13.5px; font-weight:700; color:var(--text); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .r-when { font-size:10.5px; color:var(--muted); margin-top:1px; }
+    .r-order { font-size:11px; color:var(--amber); font-weight:700; margin-top:3px;
+               background:rgba(192,98,42,0.09); display:inline-block; padding:1px 8px; border-radius:6px; }
+    .r-body { font-size:13px; color:var(--text2); margin-top:11px; line-height:1.65; }
+    .r-tags { display:flex; flex-wrap:wrap; gap:6px; margin-top:10px; }
+    .t-pill { display:inline-flex; align-items:center; gap:4px; font-size:11px; font-weight:700;
+              padding:4px 10px; border-radius:999px; }
+    .t-ci  { background:rgba(192,98,42,0.1); color:var(--amber); }
+    .t-ppl { background:rgba(139,0,0,0.09); color:var(--red); }
+    .t-tag { background:var(--gold-dim); color:#7a5a00; }
+    .del-btn { width:34px; height:34px; border-radius:10px; background:rgba(139,0,0,0.08); color:var(--red);
+               border:none; cursor:pointer; display:flex; align-items:center; justify-content:center;
+               flex-shrink:0; transition:background 0.15s; }
+    .del-btn:active { background:rgba(139,0,0,0.18); }
+    .more-btn { margin-top:10px; width:100%; padding:8px; border-radius:10px;
+                background:rgba(212,148,58,0.07); border:1px solid rgba(212,148,58,0.15);
+                color:var(--text2); font-size:11px; font-weight:700; font-family:'Nunito',sans-serif;
+                cursor:pointer; display:flex; align-items:center; justify-content:center; gap:5px;
+                transition:background 0.15s; }
+    .more-btn:active { background:rgba(212,148,58,0.14); }
+    .photo-grid { display:grid; gap:4px; border-radius:12px; overflow:hidden; margin-top:10px; }
+    .pg1{grid-template-columns:1fr} .pg2{grid-template-columns:1fr 1fr}
+    .pg3{grid-template-columns:1fr 1fr} .pg4{grid-template-columns:1fr 1fr}
+    .ph-item { aspect-ratio:1; background:#e8dcc6; position:relative; overflow:hidden; }
+    .ph-item img { width:100%; height:100%; object-fit:cover; }
+    .ph-del { position:absolute; top:5px; right:5px; width:24px; height:24px;
+              background:rgba(0,0,0,0.52); border-radius:50%; border:none; cursor:pointer;
+              color:white; display:flex; align-items:center; justify-content:center; }
+
+    /* ── Stars ── */
+    .stars { display:flex; gap:5px; }
+    .star { background:none; border:none; cursor:pointer; padding:0; transition:transform 0.1s; }
+    .star:active { transform:scale(0.8); }
+
+    /* ── Page header ── */
+    .pg-hd { background:linear-gradient(160deg, var(--red-dark) 0%, var(--red) 100%); padding:18px 20px 20px;
+             text-align:center; position:relative; overflow:hidden; }
+    .pg-hd::before { content:''; position:absolute; inset:0;
+                      background-image:radial-gradient(circle at 80% 20%, rgba(212,148,58,0.12) 0%, transparent 60%); }
+    .pg-title { display:flex; align-items:center; justify-content:center; gap:9px;
+                font-family:'Yatra One',cursive; font-size:20px; color:var(--gold); margin-bottom:3px; position:relative; }
+    .pg-sub { color:rgba(253,246,236,0.45); font-size:11px; font-weight:600; letter-spacing:0.04em; }
+
+    /* ── Rate form ── */
+    .rate-star-box { background:var(--card); border:1px solid var(--border); border-radius:18px; padding:20px;
+                     text-align:center; box-shadow:var(--shadow); }
+    .flabel { font-size:11.5px; color:#7a5a00; font-weight:700; margin-bottom:7px; display:block;
+              letter-spacing:0.04em; }
+    .finput { width:100%; background:var(--glass); border:1.5px solid var(--border); border-radius:12px;
+              padding:12px 15px; font-size:13px; font-family:'Nunito',sans-serif; color:var(--text);
+              outline:none; transition:border-color 0.2s; -webkit-appearance:none; }
+    .finput:focus { border-color:var(--gold); background:rgba(255,255,255,0.9); }
+    .fta { resize:none; }
+    .chip-row { display:flex; flex-wrap:wrap; gap:7px; }
+    .chip { font-size:11.5px; padding:6px 13px; border-radius:999px; font-weight:700;
+            border:1.5px solid rgba(212,148,58,0.18); cursor:pointer;
+            background:rgba(255,255,255,0.6); color:var(--text2);
+            font-family:'Nunito',sans-serif; transition:all 0.15s;
+            animation:tagPop 0.25s ease-out both; }
+    .chip:active { transform:scale(0.93); }
+    .chip.co { background:var(--amber); color:white; border-color:transparent;
+               box-shadow:0 2px 8px rgba(192,98,42,0.3); }
+    .chip.ct { background:var(--red); color:var(--gold); border-color:transparent;
+               box-shadow:0 2px 8px rgba(139,0,0,0.3); }
+    .custom-tag-row { display:flex; gap:8px; margin-top:8px; }
+    .custom-tag-input { flex:1; background:var(--glass); border:1.5px dashed rgba(212,148,58,0.35);
+                        border-radius:12px; padding:9px 13px; font-size:12.5px; font-family:'Nunito',sans-serif;
+                        color:var(--text); outline:none; transition:border-color 0.2s; }
+    .custom-tag-input:focus { border-color:var(--gold); border-style:solid; }
+    .custom-tag-input::placeholder { color:var(--muted); }
+    .add-tag-btn { background:var(--red); color:var(--gold); border:none; border-radius:12px;
+                   padding:0 14px; cursor:pointer; font-size:18px; display:flex; align-items:center;
+                   justify-content:center; flex-shrink:0; }
+    .action-row { display:flex; gap:8px; }
+    .action-btn { flex:1; display:flex; justify-content:center; align-items:center; gap:7px;
+                  padding:12px; border-radius:14px; border:1.5px solid var(--border);
+                  font-size:12.5px; font-weight:700; font-family:'Nunito',sans-serif;
+                  cursor:pointer; background:var(--glass); color:var(--text2); transition:all 0.2s; }
+    .action-btn:active { transform:scale(0.97); }
+    .action-btn.ci { background:var(--amber); color:white; border-color:transparent;
+                     box-shadow:0 3px 12px rgba(192,98,42,0.3); }
+    .action-btn.tg { background:var(--red); color:var(--gold); border-color:transparent;
+                     box-shadow:0 3px 12px rgba(139,0,0,0.3); }
+    .submit-btn { width:100%; margin-top:8px; padding:15px; border-radius:16px; border:none;
+                  font-size:15px; font-weight:800; font-family:'Nunito',sans-serif; cursor:pointer;
+                  display:flex; justify-content:center; align-items:center; gap:9px; transition:all 0.2s; }
+    .submit-btn.go { background:linear-gradient(135deg, var(--red-dark), var(--amber));
+                     color:white; box-shadow:0 6px 24px rgba(139,0,0,0.35); }
+    .submit-btn.go:active { transform:scale(0.97); box-shadow:0 2px 10px rgba(139,0,0,0.25); }
+    .submit-btn.no { background:#e9e0d5; color:#bbb; cursor:not-allowed; }
+
+    /* ── Tag input box ── */
+    .tag-box { background:var(--glass); border:1.5px solid var(--border); border-radius:16px; padding:12px; }
+    .tag-input-row { display:flex; gap:8px; }
+    .tag-add-btn { background:var(--red); color:var(--gold); border:none; border-radius:11px;
+                   padding:0 12px; cursor:pointer; font-size:18px; display:flex; align-items:center; }
+    .ppills { display:flex; flex-wrap:wrap; gap:6px; margin-top:8px; }
+    .ppill { display:inline-flex; align-items:center; gap:4px; background:rgba(139,0,0,0.09);
+             color:var(--red); font-size:11px; font-weight:700; padding:4px 10px; border-radius:999px; }
+    .px { background:none; border:none; cursor:pointer; color:inherit; display:flex; padding:0; }
+
+    /* ── Toast ── */
+    .toast { position:fixed; bottom:76px; left:50%; transform:translateX(-50%);
+             background:linear-gradient(135deg,var(--red-dark),var(--red));
+             color:var(--bg); padding:10px 22px; border-radius:999px; font-size:12.5px; font-weight:700;
+             border:1px solid rgba(212,148,58,0.3); box-shadow:0 6px 24px rgba(139,0,0,0.35);
+             z-index:999; animation:scaleIn 0.3s ease-out; white-space:nowrap; }
+
+    /* ── Rank badge ── */
+    .rank-wrap { position:relative; }
+    .rank-badge { position:absolute; top:-5px; left:-5px; z-index:10; width:30px; height:30px;
+                  border-radius:50%; display:flex; align-items:center; justify-content:center;
+                  font-size:12px; font-weight:800; box-shadow:0 3px 10px rgba(0,0,0,0.25); }
+    .rk1{background:linear-gradient(135deg,#e8a020,#f0c060);color:white}
+    .rk2{background:linear-gradient(135deg,#9eaab4,#c5d0d8);color:#444}
+    .rk3{background:linear-gradient(135deg,#c07040,#d89060);color:white}
+
+    /* ── My reviews summary ── */
+    .my-sum { background:linear-gradient(135deg,rgba(192,98,42,0.1),rgba(212,148,58,0.12));
+              border:1px solid rgba(212,148,58,0.18); border-radius:18px; padding:16px; margin-bottom:16px;
+              display:flex; justify-content:space-between; align-items:center; box-shadow:var(--shadow); }
+    .sum-v { font-size:26px; font-weight:800; color:var(--text); }
+    .sum-l { font-size:10.5px; color:#7a5a00; font-weight:700; letter-spacing:0.04em; }
+
+    /* ── Empty ── */
+    .empty { text-align:center; padding:64px 0; }
+    .empty-txt { color:var(--muted); font-size:13px; margin-top:12px; font-weight:600; }
+
+    /* ── Success ── */
+    .success { text-align:center; margin-top:12px; animation:scaleIn 0.3s ease-out; }
+
+    /* ── Wave ── */
+    .wave { width:100%; display:block; margin-bottom:-1px; }
+
+    /* ── Form section card ── */
+    .fsec { background:var(--card); border:1px solid var(--border); border-radius:18px; padding:15px;
+            box-shadow:var(--shadow); }
+  </style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useEffect, useCallback, createContext, useContext, useRef } = React;
+
+const SKEY = 'aam_reviews_v2';
+const UKEY = 'aam_user_id';
+const CKEY = 'aam_checkins';
+
+function uid() {
+  let id = localStorage.getItem(UKEY);
+  if (!id) { id='u_'+Date.now()+'_'+Math.random().toString(36).substr(2,8); localStorage.setItem(UKEY,id); }
+  return id;
+}
+
+function initials(name='') { const w=name.trim().split(' '); return w.length>=2?w[0][0]+w[1][0]:name[0]||'C'; }
+
+async function compressImage(file,maxW=800,q=0.72){
+  return new Promise(res=>{
+    const r=new FileReader();
+    r.onload=e=>{
+      const img=new window.Image();
+      img.onload=()=>{
+        const c=document.createElement('canvas');
+        const ratio=Math.min(maxW/img.width,maxW/img.height,1);
+        c.width=img.width*ratio; c.height=img.height*ratio;
+        c.getContext('2d').drawImage(img,0,0,c.width,c.height);
+        res(c.toDataURL('image/jpeg',q));
+      };
+      img.src=e.target.result;
+    };
+    r.readAsDataURL(file);
+  });
+}
+
+/* ── Context ── */
+const RCtx = createContext();
+function ReviewProvider({children}){
+  const [reviews,setReviews]=useState([]);
+  const [checkins,setCheckins]=useState([]);
+  const [toast,setToast]=useState(null);
+  const userId=uid();
+
+  useEffect(()=>{
+    try{const s=localStorage.getItem(SKEY);if(s)setReviews(JSON.parse(s));}catch{}
+    try{const c=localStorage.getItem(CKEY);if(c)setCheckins(JSON.parse(c));}catch{}
+  },[]);
+
+  const save=useCallback((r)=>{setReviews(r);localStorage.setItem(SKEY,JSON.stringify(r));},[]);
+
+  const addReview=useCallback((rev)=>{
+    const nr={...rev,id:Date.now().toString(),userId,createdAt:new Date().toISOString()};
+    save([nr,...reviews]); flash('🍵 Submitted! Dhanyavaad!'); return nr;
+  },[reviews,save,userId]);
+
+  const addCheckin=useCallback(()=>{
+    const nc={id:Date.now().toString(),userId,createdAt:new Date().toISOString()};
+    const u=[nc,...checkins]; setCheckins(u); localStorage.setItem(CKEY,JSON.stringify(u));
+    flash('📍 Checked in at आशीर्वाद अमृततुल्य!');
+  },[checkins,userId]);
+
+  const deleteReview=useCallback((id)=>{save(reviews.filter(r=>r.id!==id));flash('🗑️ Review deleted');},[reviews,save]);
+
+  const getStats=useCallback(()=>{
+    const t=reviews.length;
+    const avg=t===0?'0.0':(reviews.reduce((s,r)=>s+r.rating,0)/t).toFixed(1);
+    const today=new Date();
+    const td=reviews.filter(r=>new Date(r.createdAt).toDateString()===today.toDateString()).length;
+    return{total:t,avg,todayCount:td,totalCheckins:checkins.length};
+  },[reviews,checkins]);
+
+  const getTopRated=useCallback(()=>
+    [...reviews].sort((a,b)=>b.rating!==a.rating?b.rating-a.rating:new Date(b.createdAt)-new Date(a.createdAt)),
+  [reviews]);
+
+  const getMyReviews=useCallback(()=>reviews.filter(r=>r.userId===userId),[reviews,userId]);
+
+  const flash=useCallback((m)=>{setToast(m);setTimeout(()=>setToast(null),2600);},[]);
+
+  return(
+    <RCtx.Provider value={{reviews,addReview,deleteReview,getStats,getTopRated,getMyReviews,addCheckin,toast}}>
+      {children}
+      {toast&&<div className="toast">{toast}</div>}
+    </RCtx.Provider>
+  );
+}
+function useR(){const c=useContext(RCtx);if(!c)throw new Error();return c;}
+
+/* ── SVG Icons ── */
+const I={
+  home:(a)=><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={a?2.5:1.8} strokeLinecap="round" strokeLinejoin="round"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z"/><path d="M9 21V12h6v9"/></svg>,
+  star:(a)=><svg width="22" height="22" viewBox="0 0 24 24" fill={a?"currentColor":"none"} stroke="currentColor" strokeWidth={a?2.5:1.8} strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>,
+  award:(a)=><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={a?2.5:1.8} strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="8" r="7"/><path d="M8.21 13.89L7 23l5-3 5 3-1.21-9.12"/></svg>,
+  user:(a)=><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={a?2.5:1.8} strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>,
+  send:<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>,
+  trash:<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>,
+  pin:<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>,
+  users:<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>,
+  check:<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>,
+  plus:<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>,
+  x:<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>,
+  trophy:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#D4943A" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><polyline points="8 21 8 7"/><polyline points="16 21 16 7"/><path d="M5 7H2a1 1 0 01-1-1V5a1 1 0 011-1h20a1 1 0 011 1v1a1 1 0 01-1 1h-3"/><path d="M8 21h8"/><path d="M5 7c0 6 2 10 7 10s7-4 7-10"/></svg>,
+  uBig:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#D4943A" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>,
+  uPlus:<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>,
+  camera:<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>,
+  gallery:<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>,
+  tag:<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>,
+  edit:<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>,
+};
+
+/* ── Chai cup SVG ── */
+function ChaiCup({size=30,style={}}){
+  return(
+    <div style={{position:'relative',display:'inline-block',flexShrink:0}}>
+      <div className="s1 steam-line" style={{position:'absolute',top:-2,left:'22%',height:14,width:3,borderRadius:4,background:'rgba(253,246,236,0.6)',animation:'steam 1.8s ease-in-out infinite'}}/>
+      <div className="s2 steam-line" style={{position:'absolute',top:-4,left:'46%',height:18,width:3,borderRadius:4,background:'rgba(253,246,236,0.6)',animation:'steam 1.8s ease-in-out infinite',animationDelay:'0.5s'}}/>
+      <div className="s3 steam-line" style={{position:'absolute',top:-1,left:'68%',height:12,width:3,borderRadius:4,background:'rgba(253,246,236,0.6)',animation:'steam 1.8s ease-in-out infinite',animationDelay:'1s'}}/>
+      <svg width={size} height={size} viewBox="0 0 64 64" fill="none" style={{...style,animation:'float 3s ease-in-out infinite',display:'block'}}>
+        <path d="M18 26c0-6 4-10 10-10h8c6 0 10 4 10 10v10c0 10-6 18-18 18S18 46 18 36V26z" fill="#D4943A" opacity="0.9"/>
+        <path d="M22 28c0-4 3-8 8-8h4c5 0 8 4 8 8v8c0 8-4 14-14 14S22 44 22 36v-8z" fill="#FDF6EC" opacity="0.95"/>
+        <path d="M42 30h4c4 0 6 2 6 6s-2 6-6 6h-4" stroke="#FDF6EC" strokeWidth="4" strokeLinecap="round"/>
+      </svg>
+    </div>
+  );
+}
+
+/* ── Star Rating ── */
+function Stars({rating,onRate,size=18,interactive=false}){
+  return(
+    <div className="stars">
+      {[1,2,3,4,5].map(n=>(
+        <button key={n} type="button" className="star" onClick={()=>interactive&&onRate?.(n)}>
+          <svg width={size} height={size} viewBox="0 0 24 24"
+            fill={n<=rating?'#D4943A':'none'}
+            stroke="#D4943A" strokeOpacity={n<=rating?1:0.22} strokeWidth="1.5"
+            strokeLinecap="round" strokeLinejoin="round">
+            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+          </svg>
+        </button>
+      ))}
+    </div>
+  );
+}
+
+/* ── Review Card ── */
+function RCard({review,showDelete=false,onDelete,index=0}){
+  const [exp,setExp]=useState(false);
+  const hasPhotos=Array.isArray(review.photos)&&review.photos.length>0;
+  const hasTags=Array.isArray(review.tags)&&review.tags.length>0;
+  const hasPpl=Array.isArray(review.taggedPeople)&&review.taggedPeople.length>0;
+  const when=(()=>{try{return new Date(review.createdAt).toLocaleString([],{dateStyle:'medium',timeStyle:'short'});}catch{return '';}})();
+  const longText=review.text&&review.text.length>140;
+  const showMore=longText||(hasTags&&review.tags.length>3)||(hasPhotos&&review.photos.length>4);
+  const nm=review.name||'Chai Lover';
+  return(
+    <div className="r-card" style={{animationDelay:`${Math.min(index*55,220)}ms`,animationFillMode:'forwards'}}>
+      <div className="r-top">
+        <div className="r-avatar">{initials(nm)}</div>
+        <div className="r-meta">
+          <div className="r-name">{nm}</div>
+          <div className="r-when">{when}</div>
+          {review.order&&<div className="r-order">☕ {review.order}</div>}
+        </div>
+        <div style={{display:'flex',alignItems:'center',gap:7,flexShrink:0}}>
+          <Stars rating={review.rating||0} size={15}/>
+          {showDelete&&<button className="del-btn" onClick={()=>onDelete?.(review.id)}>{I.trash}</button>}
+        </div>
+      </div>
+      {review.text&&(
+        <div className="r-body" style={{
+          display:'-webkit-box', WebkitBoxOrient:'vertical',
+          overflow:'hidden', WebkitLineClamp:exp?'unset':3
+        }}>{review.text}</div>
+      )}
+      {(hasTags||review.checkedIn||hasPpl)&&(
+        <div className="r-tags">
+          {review.checkedIn&&<span className="t-pill t-ci">{I.pin}Checked in</span>}
+          {hasPpl&&<span className="t-pill t-ppl">{I.users}{review.taggedPeople.length} tagged</span>}
+          {hasTags&&(exp?review.tags:review.tags.slice(0,3)).map(t=>(
+            <span key={t} className="t-pill t-tag">{t}</span>
+          ))}
+          {hasTags&&!exp&&review.tags.length>3&&<span className="t-pill t-tag">+{review.tags.length-3}</span>}
+        </div>
+      )}
+      {hasPhotos&&(
+        <div style={{marginTop:10}}>
+          <div style={{fontSize:11,color:'var(--muted)',marginBottom:6,display:'flex',alignItems:'center',gap:5,fontWeight:600}}>
+            {I.gallery} Photos ({review.photos.length})
+          </div>
+          <div className={`photo-grid pg${Math.min(review.photos.length,4)}`}>
+            {review.photos.slice(0,exp?review.photos.length:4).map((s,i)=>(
+              <a key={i} href={s} target="_blank" rel="noreferrer" className="ph-item"><img src={s} alt=""/></a>
+            ))}
+          </div>
+          {!exp&&review.photos.length>4&&<div style={{fontSize:11,color:'var(--muted)',marginTop:6,fontWeight:600}}>+{review.photos.length-4} more photos</div>}
+        </div>
+      )}
+      {showMore&&(
+        <button className="more-btn" onClick={()=>setExp(!exp)}>
+          {exp?'▲ Show less':'▼ Show more'}
+        </button>
+      )}
+    </div>
+  );
+}
+
+/* ── Hero Header ── */
+function Hero(){
+  return(
+    <div className="hero">
+      <div className="hero-bg-pattern"/>
+      <div className="hero-dots"/>
+      <div className="hero-body">
+        <div className="hero-top">
+          <ChaiCup size={52}/>
+          <div>
+            <div className="hero-name">आशीर्वाद अमृततुल्य</div>
+            <div className="hero-roman">Aashirwad Amruttulya</div>
+            <div className="hero-badge"><span style={{fontSize:10}}>⭐</span><span className="hero-badge-txt">स्वाद अपनों का</span></div>
+          </div>
+        </div>
+        <div className="hero-info">
+          <p style={{color:'rgba(253,246,236,0.92)',fontSize:13,lineHeight:1.65,fontWeight:500}}>Premium chai, warm vibes, and your honest reviews.</p>
+          <p style={{color:'rgba(253,246,236,0.5)',fontSize:11,marginTop:4,fontWeight:600}}>Tap <strong style={{color:'var(--gold)'}}>Rate</strong> below to share your अनुभव.</p>
+        </div>
+      </div>
+      <svg viewBox="0 0 400 24" className="hero-wave"><path d="M0 24 Q100 4 200 14 Q300 24 400 8 L400 24 Z" fill="#fdf6ec"/></svg>
+    </div>
+  );
+}
+
+/* ── Data ── */
+const HOT=[
+  {name:'Masala Chai',price:10},{name:'Kulhad Masala Chai',price:15},
+  {name:'Black Tea',price:15},{name:'Black Coffee',price:15},
+  {name:'Lemon Tea',price:15},{name:'Green Tea',price:20},
+  {name:'Tulsi Tea',price:20},{name:'Sugar Free Chai',price:20},
+  {name:'Coffee',price:20},{name:'Chocolate Tea',price:20},
+  {name:'Jaggery Coffee',price:20},{name:'Jaggery Chai',price:20},
+  {name:'Badam Kesar Milk',price:30},
+];
+const COLD=[
+  {name:'Nimbu Sharbat',price:20},{name:'Chocolate Milkshake',price:40},
+  {name:'Mango Milkshake',price:40},{name:'Oreo Shake',price:40},
+  {name:'Badam Shake',price:40},{name:'Cold Coffee',price:40},
+];
+const ALL_ORDERS=[...HOT.map(i=>i.name),...COLD.map(i=>i.name)];
+const PRESET_TAGS=['Great Chai','Tasty Bun Maska','Clean Place','Friendly Staff','Quick Service','Good Vibe','Budget Friendly','Best Cutting'];
+
+/* ── Pages ── */
+function HomePage(){
+  const {reviews,getStats}=useR();
+  const s=getStats();
+  const [tab,setTab]=useState('hot');
+  return(
+    <div>
+      <Hero/>
+      <div className="stats-wrap">
+        <div className="stats-card au d2" style={{opacity:0,animationFillMode:'forwards'}}>
+          <div className="stats-grid">
+            <div className="stat"><div className="stat-n">{s.avg}</div><div className="stat-l">AVG RATING</div></div>
+            <div className="stat-sep"/>
+            <div className="stat"><div className="stat-n">{s.total}</div><div className="stat-l">REVIEWS</div></div>
+            <div className="stat-sep"/>
+            <div className="stat"><div className="stat-n">{s.totalCheckins}</div><div className="stat-l">CHECK-INS</div></div>
+            <div className="stat-sep"/>
+            <div className="stat"><div className="stat-n">{s.todayCount}</div><div className="stat-l">TODAY</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div className="sec">
+        <div className="sec-hd">
+          <div className="sec-title">📋 Menu</div>
+        </div>
+        <div className="tab-row">
+          <button className={`tab ${tab==='hot'?'on':'off'}`} onClick={()=>setTab('hot')}>🔥 Hot Drinks</button>
+          <button className={`tab ${tab==='cold'?'on':'off'}`} onClick={()=>setTab('cold')}>❄️ Cold Drinks</button>
+        </div>
+        <div className="menu-card">
+          {(tab==='hot'?HOT:COLD).map(item=>(
+            <div key={item.name} className="menu-row">
+              <span className="menu-nm">{item.name}</span>
+              <span className="menu-pr">₹{item.price}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="sec" style={{marginBottom:28}}>
+        <div className="sec-hd">
+          <div className="sec-title">🗣️ Latest Reviews</div>
+          {reviews.length>0&&<div className="sec-count">{reviews.length} total</div>}
+        </div>
+        <div style={{display:'flex',flexDirection:'column',gap:12}}>
+          {reviews.slice(0,5).length===0?(
+            <div className="empty"><div style={{fontSize:48}}>🍵</div><div className="empty-txt">No reviews yet — be the first!</div></div>
+          ):reviews.slice(0,5).map((r,i)=><RCard key={r.id} review={r} index={i}/>)}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function RatePage(){
+  const {addReview,addCheckin}=useR();
+  const [rating,setRating]=useState(0);
+  const [name,setName]=useState('');
+  const [order,setOrder]=useState('');
+  const [text,setText]=useState('');
+  const [tags,setTags]=useState([]);
+  const [customTagInput,setCustomTagInput]=useState('');
+  const [photos,setPhotos]=useState([]);
+  const [checkedIn,setCheckedIn]=useState(false);
+  const [taggedPeople,setTaggedPeople]=useState([]);
+  const [tagInput,setTagInput]=useState('');
+  const [showTagInput,setShowTagInput]=useState(false);
+  const [submitted,setSubmitted]=useState(false);
+  const fileRef=useRef(null);
+  const camRef=useRef(null);
+
+  const toggleTag=t=>setTags(p=>p.includes(t)?p.filter(x=>x!==t):[...p,t]);
+  const removeTag=t=>setTags(p=>p.filter(x=>x!==t));
+
+  const addCustomTag=()=>{
+    const v=customTagInput.trim();
+    if(v&&!tags.includes(v)&&tags.length<15){setTags(p=>[...p,v]);setCustomTagInput('');}
+  };
+
+  const handleCheckin=()=>{if(!checkedIn){addCheckin();setCheckedIn(true);}};
+  const addPerson=()=>{
+    const t=tagInput.trim();
+    if(t&&!taggedPeople.includes(t)&&taggedPeople.length<5){setTaggedPeople(p=>[...p,t]);setTagInput('');}
+  };
+  const handlePhotos=async(e)=>{
+    const files=Array.from(e.target.files);
+    const rem=4-photos.length;
+    for(const f of files.slice(0,rem)){
+      const c=await compressImage(f);
+      setPhotos(p=>[...p,c]);
+    }
+    e.target.value='';
+  };
+
+  const reset=()=>{
+    setRating(0);setName('');setOrder('');setText('');setTags([]);setPhotos([]);
+    setCheckedIn(false);setTaggedPeople([]);setTagInput('');setShowTagInput(false);setCustomTagInput('');
+  };
+
+  const submit=()=>{
+    if(rating===0)return;
+    addReview({rating,name:name.trim()||'Chai Lover',order,text:text.trim(),tags,photos,checkedIn,taggedPeople});
+    reset();setSubmitted(true);setTimeout(()=>setSubmitted(false),3000);
+  };
+
+  return(
+    <div>
+      <div className="pg-hd">
+        <div className="pg-title"><ChaiCup size={28}/>Rate Your Chai</div>
+        <div className="pg-sub">Share your अनुभव with us!</div>
+      </div>
+      <div style={{padding:'12px 16px 28px',display:'flex',flexDirection:'column',gap:14}}>
+
+        {/* Star Rating */}
+        <div className="rate-star-box au" style={{opacity:0,animationFillMode:'forwards'}}>
+          <div style={{fontSize:13,color:'var(--text2)',fontWeight:700,marginBottom:14}}>How was your chai? ☕</div>
+          <div style={{display:'flex',justifyContent:'center',marginBottom:8}}>
+            <Stars rating={rating} onRate={setRating} size={40} interactive/>
+          </div>
+          {rating>0&&(
+            <div style={{fontSize:12,color:'var(--muted)',fontWeight:600,animation:'fadeIn 0.3s ease-out'}}>
+              {['','😐 Not great','😕 Could be better','🙂 It was okay','😊 Pretty good!','🤩 Absolutely loved it!'][rating]}
+            </div>
+          )}
+        </div>
+
+        {/* Check-in & Tag */}
+        <div className="action-row au d1" style={{opacity:0,animationFillMode:'forwards'}}>
+          <button className={`action-btn ${checkedIn?'ci':''}`} onClick={handleCheckin}>
+            {checkedIn?I.check:I.pin} {checkedIn?'Checked In!':'Check In'}
+          </button>
+          <button className={`action-btn ${taggedPeople.length>0?'tg':''}`} onClick={()=>setShowTagInput(!showTagInput)}>
+            {I.uPlus} Tag Friends ({taggedPeople.length})
+          </button>
+        </div>
+
+        {showTagInput&&(
+          <div className="tag-box asi" style={{opacity:0,animationFillMode:'forwards'}}>
+            <div className="tag-input-row">
+              <input className="finput" style={{flex:1}} type="text" value={tagInput}
+                onChange={e=>setTagInput(e.target.value)}
+                onKeyDown={e=>e.key==='Enter'&&addPerson()}
+                placeholder="Friend's name…"/>
+              <button className="tag-add-btn" onClick={addPerson}>{I.plus}</button>
+            </div>
+            {taggedPeople.length>0&&(
+              <div className="ppills">
+                {taggedPeople.map(p=>(
+                  <span key={p} className="ppill">@{p}
+                    <button className="px" onClick={()=>setTaggedPeople(pp=>pp.filter(x=>x!==p))}>{I.x}</button>
+                  </span>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Name */}
+        <div className="fsec au d2" style={{opacity:0,animationFillMode:'forwards'}}>
+          <label className="flabel">YOUR NAME</label>
+          <input className="finput" type="text" value={name} onChange={e=>setName(e.target.value)} placeholder="Chai Lover"/>
+        </div>
+
+        {/* Photos */}
+        <div className="fsec au d2" style={{opacity:0,animationFillMode:'forwards'}}>
+          <label className="flabel">ADD PHOTOS (MAX 4)</label>
+          {photos.length>0&&(
+            <div className={`photo-grid pg${Math.min(photos.length,4)}`} style={{marginBottom:12}}>
+              {photos.map((ph,i)=>(
+                <div key={i} className="ph-item">
+                  <img src={ph} alt=""/>
+                  <button className="ph-del" onClick={()=>setPhotos(p=>p.filter((_,j)=>j!==i))}>{I.x}</button>
+                </div>
+              ))}
+            </div>
+          )}
+          {photos.length<4&&(
+            <div className="action-row" style={{marginTop:0}}>
+              <button className="action-btn" onClick={()=>camRef.current?.click()}>
+                <span style={{color:'var(--amber)'}}>{I.camera}</span> Camera
+              </button>
+              <button className="action-btn" onClick={()=>fileRef.current?.click()}>
+                <span style={{color:'var(--amber)'}}>{I.gallery}</span> Gallery
+              </button>
+              <input ref={camRef} type="file" accept="image/*" capture="environment" onChange={handlePhotos} style={{display:'none'}}/>
+              <input ref={fileRef} type="file" accept="image/*" multiple onChange={handlePhotos} style={{display:'none'}}/>
+            </div>
+          )}
+        </div>
+
+        {/* Order */}
+        <div className="fsec au d3" style={{opacity:0,animationFillMode:'forwards'}}>
+          <label className="flabel">WHAT DID YOU ORDER?</label>
+          <div className="chip-row">
+            {ALL_ORDERS.map(item=>(
+              <button key={item} className={`chip ${order===item?'co':''}`}
+                onClick={()=>setOrder(order===item?'':item)}>{item}</button>
+            ))}
+          </div>
+        </div>
+
+        {/* Review text */}
+        <div className="fsec au d3" style={{opacity:0,animationFillMode:'forwards'}}>
+          <label className="flabel">YOUR REVIEW</label>
+          <textarea className="finput fta" value={text} onChange={e=>setText(e.target.value)}
+            placeholder="Badhiya chai thi bhai! 🍵" rows={3}/>
+        </div>
+
+        {/* Tags — preset + custom write */}
+        <div className="fsec au d4" style={{opacity:0,animationFillMode:'forwards'}}>
+          <label className="flabel" style={{display:'flex',alignItems:'center',gap:6}}>
+            {I.tag} QUICK TAGS
+            <span style={{fontSize:10,color:'var(--muted)',fontWeight:600,marginLeft:2}}>(tap to add)</span>
+          </label>
+          <div className="chip-row" style={{marginBottom:tags.length>0?10:0}}>
+            {PRESET_TAGS.map(t=>(
+              <button key={t} className={`chip ${tags.includes(t)?'ct':''}`} onClick={()=>toggleTag(t)}>{t}</button>
+            ))}
+          </div>
+
+          {/* Custom-added tags shown here */}
+          {tags.filter(t=>!PRESET_TAGS.includes(t)).length>0&&(
+            <div className="chip-row" style={{marginTop:8,marginBottom:8}}>
+              {tags.filter(t=>!PRESET_TAGS.includes(t)).map(t=>(
+                <span key={t} style={{display:'inline-flex',alignItems:'center',gap:5,
+                  background:'linear-gradient(135deg,var(--red),var(--amber))',
+                  color:'white',fontSize:11.5,fontWeight:700,
+                  padding:'5px 11px',borderRadius:999,
+                  boxShadow:'0 2px 8px rgba(139,0,0,0.25)'}}>
+                  {t}
+                  <button style={{background:'none',border:'none',cursor:'pointer',color:'rgba(255,255,255,0.8)',display:'flex',padding:0}}
+                    onClick={()=>removeTag(t)}>{I.x}</button>
+                </span>
+              ))}
+            </div>
+          )}
+
+          {/* Write your own tag */}
+          <div style={{marginTop:10,borderTop:'1px dashed rgba(212,148,58,0.2)',paddingTop:10}}>
+            <div style={{fontSize:11,color:'var(--muted)',fontWeight:700,marginBottom:7,display:'flex',alignItems:'center',gap:5}}>
+              {I.edit} Write your own tag
+            </div>
+            <div className="custom-tag-row">
+              <input
+                className="custom-tag-input"
+                type="text"
+                value={customTagInput}
+                onChange={e=>setCustomTagInput(e.target.value)}
+                onKeyDown={e=>{if(e.key==='Enter'){e.preventDefault();addCustomTag();}}}
+                placeholder="e.g. Perfect Adrak Wali Chai…"
+                maxLength={30}
+              />
+              <button className="add-tag-btn" onClick={addCustomTag}
+                style={{opacity:customTagInput.trim()?1:0.4}}>
+                {I.plus}
+              </button>
+            </div>
+            {customTagInput.length>0&&(
+              <div style={{fontSize:10,color:'var(--muted)',marginTop:5,fontWeight:600}}>
+                {30-customTagInput.length} chars left · Press Enter or tap +
+              </div>
+            )}
+          </div>
+        </div>
+
+        <button className={`submit-btn ${rating>0?'go':'no'}`} onClick={submit} disabled={rating===0}>
+          {I.send} Submit Review
+        </button>
+        {submitted&&(
+          <div className="success">
+            <div style={{fontSize:40}}>🎉</div>
+            <div style={{fontSize:14,color:'var(--amber)',fontWeight:800,marginTop:6}}>Shukriya! Review submitted.</div>
+            <div style={{fontSize:12,color:'var(--muted)',marginTop:3,fontWeight:600}}>Your review helps others!</div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function TopPage(){
+  const {getTopRated}=useR();
+  const top=getTopRated();
+  return(
+    <div>
+      <div className="pg-hd">
+        <div className="pg-title">{I.trophy} Top Rated</div>
+        <div className="pg-sub">Our happiest chai lovers ✨</div>
+      </div>
+      <svg viewBox="0 0 400 20" className="wave"><path d="M0 20 Q200 0 400 20 L400 20 Z" fill="#fdf6ec"/></svg>
+      <div style={{padding:'8px 16px 28px'}}>
+        {top.length===0?(
+          <div className="empty"><ChaiCup size={56} style={{opacity:0.35,margin:'0 auto'}}/><div className="empty-txt">No reviews yet.</div></div>
+        ):(
+          <div style={{display:'flex',flexDirection:'column',gap:12}}>
+            {top.map((r,i)=>(
+              <div key={r.id} className="rank-wrap">
+                {i<3&&<div className={`rank-badge rk${i+1}`}>{i===0?'🥇':i===1?'🥈':'🥉'}</div>}
+                <RCard review={r} index={i}/>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function MyPage(){
+  const {getMyReviews,deleteReview}=useR();
+  const my=getMyReviews();
+  return(
+    <div>
+      <div className="pg-hd">
+        <div className="pg-title">{I.uBig} My Reviews</div>
+        <div className="pg-sub">Your review history</div>
+      </div>
+      <svg viewBox="0 0 400 20" className="wave"><path d="M0 20 Q200 0 400 20 L400 20 Z" fill="#fdf6ec"/></svg>
+      <div style={{padding:'8px 16px 28px'}}>
+        {my.length>0&&(
+          <div className="my-sum au" style={{opacity:0,animationFillMode:'forwards'}}>
+            <div><div className="sum-l">TOTAL REVIEWS</div><div className="sum-v">{my.length}</div></div>
+            <div><div className="sum-l">AVG RATING</div><div className="sum-v" style={{color:'var(--amber)'}}>{(my.reduce((s,r)=>s+r.rating,0)/my.length).toFixed(1)}</div></div>
+            <ChaiCup size={48} style={{opacity:0.45}}/>
+          </div>
+        )}
+        {my.length===0?(
+          <div className="empty"><ChaiCup size={60} style={{opacity:0.35,margin:'0 auto'}}/><div className="empty-txt">No reviews yet — go rate your chai!</div></div>
+        ):(
+          <div style={{display:'flex',flexDirection:'column',gap:12}}>
+            {my.map((r,i)=><RCard key={r.id} review={r} showDelete onDelete={deleteReview} index={i}/>)}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/* ── Root App ── */
+function App(){
+  const [page,setPage]=useState('home');
+  const Page={home:HomePage,rate:RatePage,top:TopPage,my:MyPage}[page];
+  return(
+    <div className="app">
+      <div className="scroll"><Page/></div>
+      <nav className="nav">
+        <div className="nav-row">
+          {[['home','Home',I.home],['rate','Rate',I.star],['top','Top Rated',I.award],['my','My Reviews',I.user]].map(([id,lbl,icon])=>(
+            <button key={id} className={`nav-btn ${page===id?'on':''}`} onClick={()=>setPage(id)}>
+              {icon(page===id)}
+              <span className="nav-lbl">{lbl}</span>
+            </button>
+          ))}
+        </div>
+      </nav>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(
+  <ReviewProvider><App/></ReviewProvider>
+);
+</script>
+</body>
+</html>
